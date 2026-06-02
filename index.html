@@ -1,32 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anime Pilgrimage Japan</title>
+<title>アニメ聖地データベース</title>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<style>
+body{
+    font-family:sans-serif;
+    margin:20px;
+    background:#f5f5f5;
+}
+
+h1{
+    text-align:center;
+}
+
+.anime-group{
+    margin-bottom:30px;
+}
+
+.anime-title{
+    background:#333;
+    color:white;
+    padding:10px;
+    border-radius:8px;
+}
+
+.spot-card{
+    background:white;
+    margin:10px 0;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.pref{
+    color:#666;
+    font-size:14px;
+}
+</style>
 </head>
+
 <body>
 
-<h1>Anime Pilgrimage Japan</h1>
+<h1>アニメ聖地データベース</h1>
 
-<p>Discover real anime locations across Japan.</p>
+<div id="content"></div>
 
-<h2>Your Name</h2>
-<ul>
-<li>Suga Shrine Stairs (Tokyo)</li>
-<li>Hida-Furukawa Station (Gifu)</li>
-</ul>
+<script>
 
-<h2>Slam Dunk</h2>
-<ul>
-<li>Kamakura High School Crossing (Kanagawa)</li>
-<li>Enoshima (Kanagawa)</li>
-</ul>
+Papa.parse("data.csv", {
+    download: true,
+    header: true,
+    complete: function(results) {
 
-<h2>K-On!</h2>
-<ul>
-<li>Toyosato Elementary School (Shiga)</li>
-</ul>
+        const data = results.data;
+
+        const grouped = {};
+
+        data.forEach(row => {
+
+            const anime = row["Anime"];
+
+            if(!grouped[anime]){
+                grouped[anime] = [];
+            }
+
+            grouped[anime].push(row);
+
+        });
+
+        const content = document.getElementById("content");
+
+        Object.keys(grouped).sort().forEach(anime => {
+
+            const section = document.createElement("div");
+            section.className = "anime-group";
+
+            section.innerHTML = `
+                <h2 class="anime-title">${anime}</h2>
+            `;
+
+            grouped[anime].forEach(spot => {
+
+                const card = document.createElement("div");
+                card.className = "spot-card";
+
+                card.innerHTML = `
+                    <h3>${spot["Spot Name"]}</h3>
+                    <div class="pref">
+                        ${spot["Prefecture"]} ${spot["City"]}
+                    </div>
+                    <p>${spot["Description"]}</p>
+                `;
+
+                section.appendChild(card);
+
+            });
+
+            content.appendChild(section);
+
+        });
+
+    }
+});
+
+</script>
 
 </body>
 </html>
